@@ -33,7 +33,7 @@ public class FileServiceUtilsController {
 	 * @throws IOException
 	 */
 	@PostMapping("afterCreateVolume")
-	public void afterCreateVolume(@RequestBody CreateVolumeDTO newVolumeInfo) throws IOException {
+	public void afterCreateVolume(@RequestBody CreateVolumeDTO newVolumeInfo) {
 		PathMatcher matcher = new AntPathMatcher();
 		Map<String, String> pathVariables = matcher.extractUriTemplateVariables(
 				RELATIVE_PATH_PATTERN, newVolumeInfo.getRelativePath());
