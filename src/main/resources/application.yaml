@@ -1,0 +1,15 @@
+org:
+  sciserver:
+    fileservice:
+      manager:
+        rootVolumes:
+          "[Persistent Volumes]":
+            path-on-file-server: /some/path/to/persistent
+            per-user-quota: 4194304
+          "[Scratch Volumes]":
+            path-on-file-server: /some/path/to/scratch
+          "[Persistent Workspace Volumes]":
+            path-on-file-server: /some/path/to/workspaces/persistent
+            per-volume-quota: 10485760
+          "[Scratch Workspace Volumes]":
+            path-on-file-server: /some/path/to/workspace/scratch
