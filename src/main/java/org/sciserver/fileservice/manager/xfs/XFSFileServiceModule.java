@@ -22,18 +22,26 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.sciserver.fileservice.manager.Config;
 import org.sciserver.fileservice.manager.FileServiceModule;
+import org.sciserver.fileservice.manager.dto.Quota;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -55,9 +63,12 @@ public class XFSFileServiceModule implements FileServiceModule {
 	private static final Path PROJECTS_FILE = Paths.get("/etc/projects");
 	private static final Path PROJIDS_FILE = Paths.get("/etc/projid");
 
+	private final Config config;
 	private final DefaultExecutor quotaExecutor;
 
-	public XFSFileServiceModule() {
+	@Autowired
+	public XFSFileServiceModule(Config config) {
+		this.config = config;
 		quotaExecutor = new DefaultExecutor();
 		quotaExecutor.setStreamHandler(
 				new PumpStreamHandler(new LogOutputStream() {
@@ -69,10 +80,11 @@ public class XFSFileServiceModule implements FileServiceModule {
 				new LogOutputStream() {
 					@Override
 					protected void processLine(String line, int logLevel) {
-						logger.warn("[xfs_quota] " + line);
+						logger.error("[xfs_quota] " + line);
 					}
 				}));
 	}
+
 	@Override
 	@Async
 	public void setQuota(String filePath, long numberOfBytes) {
@@ -121,6 +133,60 @@ public class XFSFileServiceModule implements FileServiceModule {
 					filePath,
 					e);
 		}
+	}
+
+	@Override
+	public Collection<Quota> getUsage() throws ExecuteException, IOException {
+		Map<String, Map<String, QuotaReportLine>> collectedQuotaOutput = new HashMap<>();
+		DefaultExecutor executor = new DefaultExecutor();
+		executor.setStreamHandler(saveLines("bytes", collectedQuotaOutput));
+		executor.execute(new CommandLine("sudo")
+				.addArgument("xfs_quota")
+				.addArgument("-xc")
+				.addArgument("report -Np", false));
+		executor.setStreamHandler(saveLines("files", collectedQuotaOutput));
+		executor.execute(new CommandLine("sudo")
+				.addArgument("xfs_quota")
+				.addArgument("-xc")
+				.addArgument("report -Ni", false));
+
+		return collectedQuotaOutput.entrySet()
+			.stream()
+			.map(folderEntry ->
+				config.getRootVolumes().entrySet().stream()
+					.filter(e -> folderEntry.getKey().startsWith(e.getValue().getPathOnFileServer()))
+					.findAny()
+					.map(rvEntry ->
+						new Quota(
+								rvEntry.getKey(),
+								folderEntry.getKey().replaceFirst("^"+rvEntry.getValue().getPathOnFileServer()+"/", ""),
+								folderEntry.getValue().get("files").getUsed(),
+								folderEntry.getValue().get("files").getHardLimit(),
+								folderEntry.getValue().get("bytes").getUsed(),
+								folderEntry.getValue().get("bytes").getHardLimit())
+					))
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+	}
+
+	private ExecuteStreamHandler saveLines(String label, Map<String, Map<String, QuotaReportLine>> outputHolder) {
+		return new PumpStreamHandler(new LogOutputStream() {
+			@Override
+			protected void processLine(String line, int logLevel) {
+				if (StringUtils.isEmpty(line)) return;
+				logger.info("[xfs_quota] " + line);
+				String[] quotaComponents = line.split("\\s+");
+				outputHolder.computeIfAbsent(quotaComponents[0], (s) -> new HashMap<>());
+				outputHolder.get(quotaComponents[0]).put(label, new QuotaReportLine(line));
+			}
+		},
+		new LogOutputStream() {
+			@Override
+			protected void processLine(String line, int logLevel) {
+				logger.error("[xfs_quota] " + line);
+			}
+		});
 	}
 
 	private Map<String, Long> getXFSProjects() throws IOException {
