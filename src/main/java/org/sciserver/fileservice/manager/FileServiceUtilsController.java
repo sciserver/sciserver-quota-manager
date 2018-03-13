@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2018 Johns Hopkins University
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
  * of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
@@ -16,6 +16,8 @@
 package org.sciserver.fileservice.manager;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -48,7 +50,7 @@ public class FileServiceUtilsController {
 	 * @throws IOException
 	 */
 	@PostMapping("afterCreateVolume")
-	public void afterCreateVolume(@RequestBody CreateVolumeDTO newVolumeInfo) {
+	public void afterCreateVolume(@RequestBody CreateVolumeDTO newVolumeInfo) throws IOException {
 		PathMatcher matcher = new AntPathMatcher();
 		Map<String, String> pathVariables = matcher.extractUriTemplateVariables(
 				RELATIVE_PATH_PATTERN, newVolumeInfo.getRelativePath());
@@ -58,16 +60,19 @@ public class FileServiceUtilsController {
 							+ newVolumeInfo.getRootVolumeName());
 				});
 
+		Path userFolder = Paths.get(rv.getPathOnFileServer(), pathVariables.get("keystoneId"));
+		Path userVolumeFolder = userFolder.resolve(pathVariables.get("userVolumeName"));
+
+		Files.createDirectories(userVolumeFolder);
+
 		if (rv.getPerUserQuota() != 0) {
 			fileServiceModule.setQuota(
-					Paths.get(rv.getPathOnFileServer(), pathVariables.get("keystoneId")).toString(),
+					userFolder.toString(),
 					rv.getPerUserQuota());
 		}
 		if (rv.getPerVolumeQuota() != 0) {
 			fileServiceModule.setQuota(
-					Paths.get(rv.getPathOnFileServer(),
-							pathVariables.get("keystoneId"),
-							pathVariables.get("userVolumeName")).toString(),
+					userVolumeFolder.toString(),
 					rv.getPerVolumeQuota());
 		}
 	}

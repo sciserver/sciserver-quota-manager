@@ -27,6 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.LogOutputStream;
+import org.apache.commons.exec.PumpStreamHandler;
 import org.sciserver.fileservice.manager.FileServiceModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,37 +53,67 @@ public class XFSFileServiceModule implements FileServiceModule {
 	 */
 	private static final long MAX_PROJECT_ID = 2^32 - 2;
 	private static final Path PROJECTS_FILE = Paths.get("/etc/projects");
-	private static final Path PROJIDS_FILE = Paths.get("/etc/projids");
+	private static final Path PROJIDS_FILE = Paths.get("/etc/projid");
 
+	private final DefaultExecutor quotaExecutor;
+
+	public XFSFileServiceModule() {
+		quotaExecutor = new DefaultExecutor();
+		quotaExecutor.setStreamHandler(
+				new PumpStreamHandler(new LogOutputStream() {
+					@Override
+					protected void processLine(String line, int logLevel) {
+						logger.info("[xfs_quota] " + line);
+					}
+				},
+				new LogOutputStream() {
+					@Override
+					protected void processLine(String line, int logLevel) {
+						logger.warn("[xfs_quota] " + line);
+					}
+				}));
+	}
 	@Override
 	@Async
 	public void setQuota(String filePath, long numberOfBytes) {
 		try {
-			logger.info("Setting quota to {} bytes on {}", numberOfBytes, filePath);
 			Map<String, Long> pathsToProjectIds = getXFSProjects();
 
+			long projectId;
 			if (pathsToProjectIds.containsKey(filePath)) {
 				logger.info(
 						"Updating quota on {} (with project id={}) to {} bytes",
 						filePath,
 						pathsToProjectIds.get(filePath),
 						numberOfBytes);
+				projectId = pathsToProjectIds.get(filePath);
 			} else {
-				long newProjectId = firstFreeId(pathsToProjectIds);
+				projectId = firstFreeId(pathsToProjectIds);
 				logger.info(
 						"Creating new XFS project {} on {} with {} bytes",
-						newProjectId,
+						projectId,
 						filePath,
 						numberOfBytes);
 				Files.write(
 						PROJECTS_FILE,
-						String.format("%d:%s\n", newProjectId, filePath).getBytes(),
+						String.format("%d:%s\n", projectId, filePath).getBytes(),
 						StandardOpenOption.APPEND);
 				Files.write(
 						PROJIDS_FILE,
-						String.format("%s:%d\n", filePath, newProjectId).getBytes(),
+						String.format("%s:%d\n", filePath, projectId).getBytes(),
 						StandardOpenOption.APPEND);
+
+				quotaExecutor.execute(new CommandLine("sudo")
+						.addArgument("xfs_quota")
+						.addArgument("-xc")
+						.addArgument(String.format("project -s %d", projectId), false));
 			}
+
+			quotaExecutor.execute(new CommandLine("sudo")
+					.addArgument("xfs_quota")
+					.addArgument("-xc")
+					.addArgument(String.format("limit -p bhard=%d %d", numberOfBytes, projectId), false));
+
 		} catch (Exception e) {
 			logger.error(
 					"Error setting quota {} on {}",
