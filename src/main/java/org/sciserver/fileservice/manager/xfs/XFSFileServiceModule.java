@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright 2018 Johns Hopkins University
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
  * of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
@@ -20,6 +20,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -47,6 +49,7 @@ public class XFSFileServiceModule implements FileServiceModule {
 	 */
 	private static final long MAX_PROJECT_ID = 2^32 - 2;
 	private static final Path PROJECTS_FILE = Paths.get("/etc/projects");
+	private static final Path PROJIDS_FILE = Paths.get("/etc/projids");
 
 	@Override
 	@Async
@@ -62,11 +65,20 @@ public class XFSFileServiceModule implements FileServiceModule {
 						pathsToProjectIds.get(filePath),
 						numberOfBytes);
 			} else {
+				long newProjectId = firstFreeId(pathsToProjectIds);
 				logger.info(
 						"Creating new XFS project {} on {} with {} bytes",
-						firstFreeId(pathsToProjectIds),
+						newProjectId,
 						filePath,
 						numberOfBytes);
+				Files.write(
+						PROJECTS_FILE,
+						String.format("%d:%s\n", newProjectId, filePath).getBytes(),
+						StandardOpenOption.APPEND);
+				Files.write(
+						PROJIDS_FILE,
+						String.format("%s:%d\n", filePath, newProjectId).getBytes(),
+						StandardOpenOption.APPEND);
 			}
 		} catch (Exception e) {
 			logger.error(
@@ -92,6 +104,10 @@ public class XFSFileServiceModule implements FileServiceModule {
 					.readValues(input);
 			while(it.hasNext()) {
 				Map<String, String> rowAsMap = it.next();
+				// skip trailing new lines or empty lines
+				if (StringUtils.isEmpty(rowAsMap.get("path")) && StringUtils.isEmpty(rowAsMap.get("projectId"))) {
+					continue;
+				}
 				pathsToProjectIds.put(rowAsMap.get("path"), Long.parseLong(rowAsMap.get("projectId")));
 			}
 		}
@@ -101,8 +117,9 @@ public class XFSFileServiceModule implements FileServiceModule {
 	private long firstFreeId(Map<String, Long> pathsToProjectIds) {
 		List<Long> ids = new ArrayList<>(pathsToProjectIds.values());
 		Collections.sort(ids);
+		int numberOfIds = ids.size();
 		for(long i=0; i < MAX_PROJECT_ID; ++i) {
-			if (!ids.get((int) i).equals(i)) {
+			if (i >= numberOfIds || !ids.get((int) i).equals(i)) {
 				return i;
 			}
 		}
