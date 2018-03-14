@@ -45,8 +45,7 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 		Health.Builder healthBuilder = new Health.Builder().up();
 		try {
 			Collection<Quota> allQuotaInfo = fileServiceModule.getUsage();
-			healthBuilder.withDetail("numberOfQuotaInfos", allQuotaInfo.size());
-			List<RuntimeException> errors = new ArrayList<>();
+			List<QuotaProblem> errors = new ArrayList<>();
 
 			config.getRootVolumes().entrySet().stream()
 				.forEach(rvEntry -> {
@@ -54,7 +53,8 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 					String rootVolumePath = rvEntry.getValue().getPathOnFileServer();
 					Path rootVolumeAsPath = Paths.get(rootVolumePath);
 					if (!Files.isDirectory(rootVolumeAsPath)) {
-						errors.add(new RootVolumeNotFound("Could not find '"+rootVolumeName+"' at "+rootVolumePath));
+						errors.add(new QuotaProblem(rootVolumePath,
+								"Could not find '"+rootVolumeName+"'"));
 						return;
 					}
 					try {
@@ -62,6 +62,7 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 							.filter(folder -> !folder.equals(rootVolumeAsPath))
 							.forEach(folder -> {
 								Path relativePath = rootVolumeAsPath.relativize(folder);
+								String folderFullName = folder.toAbsolutePath().toString();
 								Optional<Quota> folderQuota = allQuotaInfo
 									.stream()
 									.filter(q -> q.getRootVolumeName().equals(rootVolumeName))
@@ -70,14 +71,12 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 								if (relativePath.getNameCount() == 1 &&
 										(rvEntry.getValue().getPerUserQuota() > 0 || folderQuota.isPresent())) {
 									if (!folderQuota.isPresent()) {
-										errors.add(new NoQuotaOnUserFolder(
-											"No user-id level quota found on " + folder.toAbsolutePath()));
+										errors.add(new QuotaProblem(folderFullName, "No user-id level quota found"));
 									} else {
 										if (folderQuota.get().getNumberOfFilesQuota() != rvEntry.getValue().getPerUserQuota()) {
-											errors.add(new IncorrectQuotaOnUserFolder(
-												String.format("Expect a quota of %d bytes on %s, but the quota is set to %d bytes",
+											errors.add(new QuotaProblem(folderFullName,
+												String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
 														rvEntry.getValue().getPerUserQuota(),
-														folder.toAbsolutePath(),
 														folderQuota.get().getNumberOfFilesQuota())));
 										}
 									}
@@ -85,14 +84,12 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 								if (relativePath.getNameCount() == 2 &&
 										(rvEntry.getValue().getPerVolumeQuota() > 0 || folderQuota.isPresent())) {
 									if (!folderQuota.isPresent()) {
-										errors.add(new NoQuotaOnUserVolume(
-											"No volume level quota found on " + folder.toAbsolutePath()));
+										errors.add(new QuotaProblem(folderFullName, "No volume level quota found"));
 									} else {
 										if (folderQuota.get().getNumberOfFilesQuota() != rvEntry.getValue().getPerUserQuota()) {
-											errors.add(new IncorrectQuotaOnUserFolder(
-												String.format("Expect a quota of %d bytes on %s, but the quota is set to %d bytes",
+											errors.add(new QuotaProblem(folderFullName,
+												String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
 														rvEntry.getValue().getPerUserQuota(),
-														folder.toAbsolutePath(),
 														folderQuota.get().getNumberOfFilesQuota())));
 										}
 									}
@@ -105,7 +102,7 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 			if (!errors.isEmpty()) {
 				healthBuilder
 					.down()
-					.withDetail("error", errors.stream().map(e -> e.toString()));
+					.withDetail("errors", errors);
 			}
 			return healthBuilder.build();
 		} catch (Exception e) {
@@ -113,31 +110,19 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 		}
 	}
 
-	private class NoQuotaOnUserFolder extends RuntimeException {
-		private static final long serialVersionUID = -4439581930288487714L;
-		private NoQuotaOnUserFolder(String message) {
-			super(message);
+	@SuppressWarnings("unused")
+	private class QuotaProblem {
+		private final String path;
+		private final String message;
+		private QuotaProblem(String path, String message) {
+			this.path = path;
+			this.message = message;
 		}
-	}
-
-	private class NoQuotaOnUserVolume extends RuntimeException {
-		private static final long serialVersionUID = -3001467880444892661L;
-		private NoQuotaOnUserVolume(String message) {
-			super(message);
+		public String getPath() {
+			return path;
 		}
-	}
-
-	private class IncorrectQuotaOnUserFolder extends RuntimeException {
-		private static final long serialVersionUID = -7482250478054034144L;
-		private IncorrectQuotaOnUserFolder(String message) {
-			super(message);
-		}
-	}
-
-	private class RootVolumeNotFound extends RuntimeException {
-		private static final long serialVersionUID = 8045474482470737834L;
-		private RootVolumeNotFound(String message) {
-			super(message);
+		public String getMessage() {
+			return message;
 		}
 	}
 }
