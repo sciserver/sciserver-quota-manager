@@ -37,14 +37,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class FileServiceUtilsController {
+public class FileServiceUtils {
 	private static final String RELATIVE_PATH_PATTERN = "{keystoneId}/{userVolumeName}";
 
 	private final FileServiceModule fileServiceModule;
 	private final Config config;
 
 	@Autowired
-	public FileServiceUtilsController(Config config, FileServiceModule fileServiceModule) {
+	public FileServiceUtils(Config config, FileServiceModule fileServiceModule) {
 		this.config = config;
 		this.fileServiceModule = fileServiceModule;
 	}
@@ -56,8 +56,8 @@ public class FileServiceUtilsController {
 	 * @throws IOException
 	 */
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@PostMapping("afterCreateVolume")
-	public void afterCreateVolume(@RequestBody CreateVolumeDTO newVolumeInfo) throws IOException {
+	@PostMapping("createVolume")
+	public void createVolume(@RequestBody CreateVolumeDTO newVolumeInfo) throws IOException {
 		PathMatcher matcher = new AntPathMatcher();
 		Map<String, String> pathVariables = matcher.extractUriTemplateVariables(
 				RELATIVE_PATH_PATTERN, newVolumeInfo.getRelativePath());
