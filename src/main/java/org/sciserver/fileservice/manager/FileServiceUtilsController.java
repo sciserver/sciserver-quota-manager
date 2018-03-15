@@ -27,11 +27,13 @@ import org.sciserver.fileservice.manager.Config.RootVolume;
 import org.sciserver.fileservice.manager.dto.CreateVolumeDTO;
 import org.sciserver.fileservice.manager.dto.Quota;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -53,6 +55,7 @@ public class FileServiceUtilsController {
 	 * @param path
 	 * @throws IOException
 	 */
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@PostMapping("afterCreateVolume")
 	public void afterCreateVolume(@RequestBody CreateVolumeDTO newVolumeInfo) throws IOException {
 		PathMatcher matcher = new AntPathMatcher();
