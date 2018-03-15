@@ -1,0 +1,16 @@
+[Unit]
+Description=Quota Manager for Sciserver Fileservices
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/java -jar /path/to/sciserver-fileservice-manager.war
+Environment=SPRING_CONFIG_ADDITIONAL_LOCATION=/path/to/config.yaml
+
+# For hardening access to the system
+ReadWritePaths=/path/to/storage /etc/project /etc/projid #for XFS
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

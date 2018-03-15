@@ -16,11 +16,13 @@ This repository contains a utility for managing the quotas on a given system. No
 
 <h3 id="installation">Installation</h3>
 
-
-
 <h4>Initial setup</h4>
 
-Configuration TBD
+Configuration is done by creating a yaml file somewhere that can be found at runtime. This can be set by using the `spring.config.additional-location` java property, `SPRING_CONFIG_ADDITIONAL_LOCATION` environmental variable, placing a yaml file in the working directory of the service, etc.
+
+An `application.yaml` file can be placed on the root directory of this repository during development for use by IDEs. This will not be bundled into the compiled war file and is ignored by Git.
+
+An example configuration can be found in `example-deployment/example-config.yaml`.
 
 <h4>Common tasks</h4>
 
@@ -37,7 +39,7 @@ In any of these variants of Eclipse, the following steps will import the project
 - Open the Import Wizard at File -> Import
 - Select "Import an existing Maven project" if you have already cloned this repo
 - Select "Check out a Maven project from SCM" to have Eclipse checkout this repo
-- There is no need to run maven manually at any point. Eclipse will handle dependency management and reloading on configuration changes.
+- There is no need to run maven manually at any point. Eclipse will handle dependency management and reloading on configuration changes in the bundled `src/main/resources/application.properties`.
 
 <h3 id="usage">Usage</h3>
 
@@ -48,9 +50,9 @@ This service will listen on port 21222 by default, but this is configurable with
 To run in Spring Tool Suite, simply run as a Spring Boot App.
 In other variants of Eclipse, running `SciserverFileserviceManagerApplication` as a Java application will start a local web server and display the port in the Console.
 
-To run standalone, the war file is runnable with `java -jar`. For example, to set the port to 222 and use the `ceph` profile, run:
+To run standalone, the war file is runnable with `java -jar`. For example, to set the port to 222 use the `ceph` profile, and load /my/configuration.yaml, run:
 
-    java -Dserver.port=222 -Dspring.profiles.active=ceph -jar target/sciserver-fileservice-manager-0.0.1-SNAPSHOT.war
+    java -Dserver.port=222 -Dspring.profiles.active=ceph -Dspring.config.additional-location=/my/configuration.yaml -jar target/sciserver-fileservice-manager-0.0.1-SNAPSHOT.war
 
 The war file can also be deployed in any Servlet 3.0 container, including Tomcat 7.0+.
 
