@@ -23,9 +23,10 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.exec.ExecuteException;
+import org.apache.commons.io.FileUtils;
 import org.sciserver.fileservice.manager.Config.RootVolume;
-import org.sciserver.fileservice.manager.dto.CreateVolumeDTO;
 import org.sciserver.fileservice.manager.dto.Quota;
+import org.sciserver.fileservice.manager.dto.VolumeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.AntPathMatcher;
@@ -57,7 +58,7 @@ public class FileServiceUtils {
 	 */
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@PostMapping("createVolume")
-	public void createVolume(@RequestBody CreateVolumeDTO newVolumeInfo) throws IOException {
+	public void createVolume(@RequestBody VolumeDTO newVolumeInfo) throws IOException {
 		PathMatcher matcher = new AntPathMatcher();
 		Map<String, String> pathVariables = matcher.extractUriTemplateVariables(
 				RELATIVE_PATH_PATTERN, newVolumeInfo.getRelativePath());
@@ -82,6 +83,30 @@ public class FileServiceUtils {
 					userVolumeFolder.toString(),
 					rv.getPerVolumeQuota());
 		}
+	}
+
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PostMapping("deleteVolume")
+	public void deleteVolume(@RequestBody VolumeDTO newVolumeInfo) throws IOException {
+		PathMatcher matcher = new AntPathMatcher();
+		Map<String, String> pathVariables = matcher.extractUriTemplateVariables(
+				RELATIVE_PATH_PATTERN, newVolumeInfo.getRelativePath());
+		RootVolume rv = config.getRootVolumes().computeIfAbsent(newVolumeInfo.getRootVolumeName(),
+				key -> {
+					throw new UnknownVolumeNameException("Unknown root volume "
+							+ newVolumeInfo.getRootVolumeName());
+				});
+
+		Path userFolder = Paths.get(rv.getPathOnFileServer(), pathVariables.get("keystoneId"));
+		Path userVolumeFolder = userFolder.resolve(pathVariables.get("userVolumeName"));
+
+		if (rv.getPerVolumeQuota() != 0) {
+			fileServiceModule.removeQuota(
+					userVolumeFolder.toString());
+		}
+
+		FileUtils.deleteDirectory(userVolumeFolder.toFile());
+
 	}
 
 	@GetMapping("getUsage")

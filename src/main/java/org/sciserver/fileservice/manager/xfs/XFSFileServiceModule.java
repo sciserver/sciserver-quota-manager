@@ -17,6 +17,7 @@ package org.sciserver.fileservice.manager.xfs;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,6 +37,7 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.apache.commons.io.FileUtils;
 import org.sciserver.fileservice.manager.Config;
 import org.sciserver.fileservice.manager.FileServiceModule;
 import org.sciserver.fileservice.manager.dto.Quota;
@@ -128,6 +130,35 @@ public class XFSFileServiceModule implements FileServiceModule {
 			logger.error(
 					"Error setting quota {} on {}",
 					numberOfBytes,
+					filePath,
+					e);
+		}
+	}
+
+	@Override
+	@Async
+	public void removeQuota(String filePath) {
+		try {
+			logger.info("Removing " + filePath + " from XFS project files");
+
+			List<String> projidFileLines = FileUtils.readLines(
+					PROJIDS_FILE.toFile(), Charset.defaultCharset());
+			List<String> updatedProjidFileLines = projidFileLines
+					 .stream()
+					 .filter(s -> !s.contains(":"+filePath))
+					 .collect(Collectors.toList());
+			FileUtils.writeLines(PROJIDS_FILE.toFile(), updatedProjidFileLines);
+
+			List<String> projectFileLines = FileUtils.readLines(
+					PROJECTS_FILE.toFile(), Charset.defaultCharset());
+			List<String> updatedProjectFileLines = projectFileLines
+					 .stream()
+					 .filter(s -> !s.contains(filePath + ":"))
+					 .collect(Collectors.toList());
+			FileUtils.writeLines(PROJECTS_FILE.toFile(), updatedProjectFileLines);
+		} catch (Exception e) {
+			logger.error(
+					"Error remove quota on {}",
 					filePath,
 					e);
 		}
