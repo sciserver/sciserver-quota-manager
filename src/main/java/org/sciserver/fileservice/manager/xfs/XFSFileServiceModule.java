@@ -41,7 +41,6 @@ import org.sciserver.fileservice.manager.FileServiceModule;
 import org.sciserver.fileservice.manager.dto.Quota;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -66,7 +65,6 @@ public class XFSFileServiceModule implements FileServiceModule {
 	private final Config config;
 	private final DefaultExecutor quotaExecutor;
 
-	@Autowired
 	public XFSFileServiceModule(Config config) {
 		this.config = config;
 		quotaExecutor = new DefaultExecutor();
@@ -162,8 +160,9 @@ public class XFSFileServiceModule implements FileServiceModule {
 								folderEntry.getKey().replaceFirst("^"+rvEntry.getValue().getPathOnFileServer()+"/", ""),
 								folderEntry.getValue().get("files").getUsed(),
 								folderEntry.getValue().get("files").getHardLimit(),
-								folderEntry.getValue().get("bytes").getUsed(),
-								folderEntry.getValue().get("bytes").getHardLimit())
+								// xfs_quota reports these in kilobytes
+								folderEntry.getValue().get("bytes").getUsed() * 1024,
+								folderEntry.getValue().get("bytes").getHardLimit() * 1024)
 					))
 			.filter(Optional::isPresent)
 			.map(Optional::get)

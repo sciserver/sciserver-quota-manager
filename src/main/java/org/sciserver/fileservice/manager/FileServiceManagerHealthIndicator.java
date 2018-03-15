@@ -73,11 +73,11 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 									if (!folderQuota.isPresent()) {
 										errors.add(new QuotaProblem(folderFullName, "No user-id level quota found"));
 									} else {
-										if (folderQuota.get().getNumberOfFilesQuota() != rvEntry.getValue().getPerUserQuota()) {
+										if (folderQuota.get().getNumberOfBytesQuota() != rvEntry.getValue().getPerUserQuota()) {
 											errors.add(new QuotaProblem(folderFullName,
 												String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
 														rvEntry.getValue().getPerUserQuota(),
-														folderQuota.get().getNumberOfFilesQuota())));
+														folderQuota.get().getNumberOfBytesQuota())));
 										}
 									}
 								}
@@ -86,11 +86,11 @@ public class FileServiceManagerHealthIndicator implements HealthIndicator {
 									if (!folderQuota.isPresent()) {
 										errors.add(new QuotaProblem(folderFullName, "No volume level quota found"));
 									} else {
-										if (folderQuota.get().getNumberOfFilesQuota() != rvEntry.getValue().getPerUserQuota()) {
+										if (folderQuota.get().getNumberOfBytesQuota() != rvEntry.getValue().getPerVolumeQuota()) {
 											errors.add(new QuotaProblem(folderFullName,
 												String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
-														rvEntry.getValue().getPerUserQuota(),
-														folderQuota.get().getNumberOfFilesQuota())));
+														rvEntry.getValue().getPerVolumeQuota(),
+														folderQuota.get().getNumberOfBytesQuota())));
 										}
 									}
 								}
