@@ -86,7 +86,7 @@ public class XFSFileServiceModule implements FileServiceModule {
 	}
 
 	@Override
-	@Async
+	@Async("xfsEditProjectsExecutor")
 	public void setQuota(String filePath, long numberOfBytes) {
 		try {
 			Map<String, Long> pathsToProjectIds = getXFSProjects();
@@ -136,7 +136,7 @@ public class XFSFileServiceModule implements FileServiceModule {
 	}
 
 	@Override
-	@Async
+	@Async("xfsEditProjectsExecutor")
 	public void removeQuota(String filePath) {
 		try {
 			logger.info("Removing " + filePath + " from XFS project files");
