@@ -174,7 +174,7 @@ public class XFSFileServiceModule implements FileServiceModule {
 			@Override
 			protected void processLine(String line, int logLevel) {
 				if (StringUtils.isEmpty(line)) return;
-				logger.info("[xfs_quota] " + line);
+				logger.trace("[xfs_quota] " + line);
 				String[] quotaComponents = line.split("\\s+");
 				outputHolder.computeIfAbsent(quotaComponents[0], (s) -> new HashMap<>());
 				outputHolder.get(quotaComponents[0]).put(label, new QuotaReportLine(line));
