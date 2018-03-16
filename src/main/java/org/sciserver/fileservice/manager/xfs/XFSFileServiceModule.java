@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.sciserver.fileservice.manager.xfs;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
@@ -61,6 +62,7 @@ public class XFSFileServiceModule implements FileServiceModule {
 	 * the project id's are less then Integer.MAX_VALUE (2^31)
 	 */
 	private static final long MAX_PROJECT_ID = 2^32 - 2;
+	private static final long MIN_PROJECT_ID = 1;
 	private static final Path PROJECTS_FILE = Paths.get("/etc/projects");
 	private static final Path PROJIDS_FILE = Paths.get("/etc/projid");
 
@@ -139,15 +141,22 @@ public class XFSFileServiceModule implements FileServiceModule {
 
 	@Override
 	@Async("xfsEditProjectsExecutor")
-	public void removeQuota(String filePath) {
+	public void removeUserVolumeWithQuota(String filePath) {
 		try {
 			logger.info("Removing " + filePath + " from XFS project files");
+
+			Map<String, Long> pathsToProjectIds = getXFSProjects();
+			quotaExecutor.execute(new CommandLine("sudo")
+					.addArgument("xfs_quota")
+					.addArgument("-xc")
+					.addArgument(String.format(
+							"limit -p bhard=%d %d", 0, pathsToProjectIds.get(filePath)), false));
 
 			List<String> projidFileLines = FileUtils.readLines(
 					PROJIDS_FILE.toFile(), Charset.defaultCharset());
 			List<String> updatedProjidFileLines = projidFileLines
 					 .stream()
-					 .filter(s -> !s.contains(":"+filePath))
+					 .filter(s -> !s.contains(filePath + ":"))
 					 .collect(Collectors.toList());
 			FileUtils.writeLines(PROJIDS_FILE.toFile(), updatedProjidFileLines);
 
@@ -155,9 +164,11 @@ public class XFSFileServiceModule implements FileServiceModule {
 					PROJECTS_FILE.toFile(), Charset.defaultCharset());
 			List<String> updatedProjectFileLines = projectFileLines
 					 .stream()
-					 .filter(s -> !s.contains(filePath + ":"))
+					 .filter(s -> !s.contains(":" + filePath))
 					 .collect(Collectors.toList());
 			FileUtils.writeLines(PROJECTS_FILE.toFile(), updatedProjectFileLines);
+
+			FileUtils.deleteDirectory(new File(filePath));
 		} catch (Exception e) {
 			logger.error(
 					"Error remove quota on {}",
@@ -265,8 +276,8 @@ public class XFSFileServiceModule implements FileServiceModule {
 		Collections.sort(ids);
 		int numberOfIds = ids.size();
 		for(long i=0; i < MAX_PROJECT_ID; ++i) {
-			if (i >= numberOfIds || !ids.get((int) i).equals(i)) {
-				return i;
+			if (i >= numberOfIds || !ids.get((int) i).equals(i+MIN_PROJECT_ID)) {
+				return i+MIN_PROJECT_ID;
 			}
 		}
 		throw new IllegalStateException("There appears to be too many assigned projects");

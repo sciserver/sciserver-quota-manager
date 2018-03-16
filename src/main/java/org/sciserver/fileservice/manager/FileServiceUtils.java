@@ -101,12 +101,11 @@ public class FileServiceUtils {
 		Path userVolumeFolder = userFolder.resolve(pathVariables.get("userVolumeName"));
 
 		if (rv.getPerVolumeQuota() != 0) {
-			fileServiceModule.removeQuota(
+			fileServiceModule.removeUserVolumeWithQuota(
 					userVolumeFolder.toString());
+		} else {
+			FileUtils.deleteDirectory(userVolumeFolder.toFile());
 		}
-
-		FileUtils.deleteDirectory(userVolumeFolder.toFile());
-
 	}
 
 	@GetMapping("getUsage")

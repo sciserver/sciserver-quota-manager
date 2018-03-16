@@ -23,6 +23,6 @@ import org.sciserver.fileservice.manager.dto.Quota;
 
 public interface FileServiceModule {
 	void setQuota(String filePath, long numberOfBytes);
-	void removeQuota(String filePath);
+	void removeUserVolumeWithQuota(String filePath);
 	Collection<Quota> getUsage() throws ExecuteException, IOException;
 }
