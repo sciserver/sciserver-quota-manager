@@ -65,10 +65,12 @@ public class XFSFileServiceModule implements FileServiceModule {
 	private static final Path PROJIDS_FILE = Paths.get("/etc/projid");
 
 	private final Config config;
+	private final XFSConfig xfsConfig;
 	private final DefaultExecutor quotaExecutor;
 
-	public XFSFileServiceModule(Config config) {
+	public XFSFileServiceModule(Config config, XFSConfig xfsConfig) {
 		this.config = config;
+		this.xfsConfig = xfsConfig;
 		quotaExecutor = new DefaultExecutor();
 		quotaExecutor.setStreamHandler(
 				new PumpStreamHandler(new LogOutputStream() {
@@ -167,17 +169,17 @@ public class XFSFileServiceModule implements FileServiceModule {
 	@Override
 	public Collection<Quota> getUsage() throws ExecuteException, IOException {
 		Map<String, Map<String, QuotaReportLine>> collectedQuotaOutput = new HashMap<>();
-		DefaultExecutor executor = new DefaultExecutor();
-		executor.setStreamHandler(saveLines("bytes", collectedQuotaOutput));
-		executor.execute(new CommandLine("sudo")
+
+		logAndRun("bytes", collectedQuotaOutput, new CommandLine("sudo")
 				.addArgument("xfs_quota")
 				.addArgument("-xc")
-				.addArgument("report -Np", false));
-		executor.setStreamHandler(saveLines("files", collectedQuotaOutput));
-		executor.execute(new CommandLine("sudo")
+				.addArgument("report -Np", false)
+				.addArguments(splitIfPossible(xfsConfig.getMountedFileSystems())));
+		logAndRun("files", collectedQuotaOutput, new CommandLine("sudo")
 				.addArgument("xfs_quota")
 				.addArgument("-xc")
-				.addArgument("report -Ni", false));
+				.addArgument("report -Ni", false)
+				.addArguments(splitIfPossible(xfsConfig.getMountedFileSystems())));
 
 		return collectedQuotaOutput.entrySet()
 			.stream()
@@ -198,6 +200,20 @@ public class XFSFileServiceModule implements FileServiceModule {
 			.filter(Optional::isPresent)
 			.map(Optional::get)
 			.collect(Collectors.toList());
+	}
+
+	private void logAndRun(String label, Map<String, Map<String, QuotaReportLine>> outputHolder, CommandLine cmdLine) throws ExecuteException, IOException {
+		DefaultExecutor executor = new DefaultExecutor();
+		executor.setStreamHandler(saveLines(label, outputHolder));
+		logger.trace("Running command: " + cmdLine.toString());
+		executor.execute(cmdLine);
+	}
+
+	// Helper method to split a string or pass on a null
+	// Equivalent to Kotlin's line?.split("\\s+")
+	private String[] splitIfPossible(String line) {
+		if (line == null) return null;
+		return line.split("\\s+");
 	}
 
 	private ExecuteStreamHandler saveLines(String label, Map<String, Map<String, QuotaReportLine>> outputHolder) {

@@ -15,35 +15,21 @@
  ******************************************************************************/
 package org.sciserver.fileservice.manager.xfs;
 
-class QuotaReportLine {
-	/* Project ID   Used   Soft   Hard Warn/Grace
-	 * Project IDs are set to simply be the full path
-	 */
-	private final String fullPath;
-	private final long used;
-	private final long hardLimit;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-	QuotaReportLine(String line) {
-		String[] lineComponents = line.split("\\s+");
-		fullPath = lineComponents[0];
-		used = Long.parseLong(lineComponents[1]);
-		hardLimit = Long.parseLong(lineComponents[3]);
+@Component
+@Configuration
+@ConfigurationProperties(prefix="org.sciserver.fileservice.manager.xfs")
+public class XFSConfig {
+	private String mountedFileSystems;
+
+	public String getMountedFileSystems() {
+		return mountedFileSystems;
 	}
 
-	String getFullPath() {
-		return fullPath;
-	}
-
-	long getUsed() {
-		return used;
-	}
-
-	long getHardLimit() {
-		return hardLimit;
-	}
-
-	@Override
-	public String toString() {
-		return "QuotaReportLine [fullPath=" + fullPath + ", used=" + used + ", hardLimit=" + hardLimit + "]";
+	public void setMountedFileSystems(String mountedFileSystems) {
+		this.mountedFileSystems = mountedFileSystems;
 	}
 }
