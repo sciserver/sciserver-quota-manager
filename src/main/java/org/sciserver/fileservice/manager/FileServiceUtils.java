@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collection;
 import java.util.Map;
 
@@ -72,6 +73,8 @@ public class FileServiceUtils {
 		Path userVolumeFolder = userFolder.resolve(pathVariables.get("userVolumeName"));
 
 		Files.createDirectories(userVolumeFolder);
+		Files.setPosixFilePermissions(userVolumeFolder,
+				PosixFilePermissions.fromString("rwxrwxrwx"));
 
 		if (rv.getPerUserQuota() != 0) {
 			fileServiceModule.setQuota(
