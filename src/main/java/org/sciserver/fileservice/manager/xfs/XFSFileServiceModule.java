@@ -128,7 +128,8 @@ public class XFSFileServiceModule implements FileServiceModule {
 			quotaExecutor.execute(new CommandLine("sudo")
 					.addArgument("xfs_quota")
 					.addArgument("-xc")
-					.addArgument(String.format("limit -p bhard=%d %d", numberOfBytes, projectId), false));
+					.addArgument(String.format("limit -p bhard=%d %d", numberOfBytes, projectId), false)
+					.addArguments(splitIfPossible(xfsConfig.getMountedFileSystems())));
 
 		} catch (Exception e) {
 			logger.error(
@@ -150,7 +151,8 @@ public class XFSFileServiceModule implements FileServiceModule {
 					.addArgument("xfs_quota")
 					.addArgument("-xc")
 					.addArgument(String.format(
-							"limit -p bhard=%d %d", 0, pathsToProjectIds.get(filePath)), false));
+							"limit -p bhard=%d %d", 0, pathsToProjectIds.get(filePath)), false)
+					.addArguments(splitIfPossible(xfsConfig.getMountedFileSystems())));
 
 			List<String> projidFileLines = FileUtils.readLines(
 					PROJIDS_FILE.toFile(), Charset.defaultCharset());
