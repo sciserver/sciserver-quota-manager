@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.sciserver.fileservice.manager.dto;
+package org.sciserver.quota.manager.dto;
 
 public class Quota {
 	private final String rootVolumeName;

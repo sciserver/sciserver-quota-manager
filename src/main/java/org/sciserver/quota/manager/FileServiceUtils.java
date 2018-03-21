@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.sciserver.fileservice.manager;
+package org.sciserver.quota.manager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,9 +25,9 @@ import java.util.Map;
 
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.FileUtils;
-import org.sciserver.fileservice.manager.Config.RootVolume;
-import org.sciserver.fileservice.manager.dto.Quota;
-import org.sciserver.fileservice.manager.dto.VolumeDTO;
+import org.sciserver.quota.manager.Config.RootVolume;
+import org.sciserver.quota.manager.dto.Quota;
+import org.sciserver.quota.manager.dto.VolumeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.AntPathMatcher;

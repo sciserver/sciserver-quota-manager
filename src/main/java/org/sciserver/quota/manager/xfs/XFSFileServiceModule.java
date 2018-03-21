@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.sciserver.fileservice.manager.xfs;
+package org.sciserver.quota.manager.xfs;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,9 +39,9 @@ import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
-import org.sciserver.fileservice.manager.Config;
-import org.sciserver.fileservice.manager.FileServiceModule;
-import org.sciserver.fileservice.manager.dto.Quota;
+import org.sciserver.quota.manager.Config;
+import org.sciserver.quota.manager.FileServiceModule;
+import org.sciserver.quota.manager.dto.Quota;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;

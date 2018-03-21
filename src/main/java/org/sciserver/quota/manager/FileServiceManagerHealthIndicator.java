@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.sciserver.fileservice.manager;
+package org.sciserver.quota.manager;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.sciserver.fileservice.manager.dto.Quota;
+import org.sciserver.quota.manager.dto.Quota;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;

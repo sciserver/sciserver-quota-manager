@@ -1,41 +1,49 @@
 /*******************************************************************************
  * Copyright 2018 Johns Hopkins University
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
  * of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.sciserver.fileservice.manager.dto;
+package org.sciserver.quota.manager.xfs;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+class QuotaReportLine {
+	/* Project ID   Used   Soft   Hard Warn/Grace
+	 * Project IDs are set to simply be the full path
+	 */
+	private final String fullPath;
+	private final long used;
+	private final long hardLimit;
 
-public class VolumeDTO {
-	private final String rootVolumeName;
-	private final String relativePath;
-
-	@JsonCreator
-	public VolumeDTO(
-			@JsonProperty("rootVolumeName") String rootVolumeName,
-			@JsonProperty("relativePath") String relativePath) {
-		super();
-		this.rootVolumeName = rootVolumeName;
-		this.relativePath = relativePath;
+	QuotaReportLine(String line) {
+		String[] lineComponents = line.split("\\s+");
+		fullPath = lineComponents[0];
+		used = Long.parseLong(lineComponents[1]);
+		hardLimit = Long.parseLong(lineComponents[3]);
 	}
 
-	public String getRootVolumeName() {
-		return rootVolumeName;
+	String getFullPath() {
+		return fullPath;
 	}
 
-	public String getRelativePath() {
-		return relativePath;
+	long getUsed() {
+		return used;
+	}
+
+	long getHardLimit() {
+		return hardLimit;
+	}
+
+	@Override
+	public String toString() {
+		return "QuotaReportLine [fullPath=" + fullPath + ", used=" + used + ", hardLimit=" + hardLimit + "]";
 	}
 }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package org.sciserver.fileservice.manager;
+package org.sciserver.quota.manager;
 
 public class UnknownVolumeNameException extends RuntimeException {
 	private static final long serialVersionUID = -1770769172806700962L;

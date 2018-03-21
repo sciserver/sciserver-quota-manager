@@ -1,4 +1,4 @@
-package org.sciserver.fileservice.manager.xfs;
+package org.sciserver.quota.manager.xfs;
 
 import java.util.concurrent.Executor;
 
