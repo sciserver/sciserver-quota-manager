@@ -31,11 +31,11 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FileServiceManagerHealthIndicator implements HealthIndicator {
+public class QuotaManagerHealthIndicator implements HealthIndicator {
 	private final Config config;
 	private final FileServiceModule fileServiceModule;
 
-	public FileServiceManagerHealthIndicator(Config config, FileServiceModule fileServiceModule) {
+	public QuotaManagerHealthIndicator(Config config, FileServiceModule fileServiceModule) {
 		this.config = config;
 		this.fileServiceModule = fileServiceModule;
 	}

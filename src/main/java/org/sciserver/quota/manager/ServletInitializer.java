@@ -22,7 +22,7 @@ public class ServletInitializer extends SpringBootServletInitializer {
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(SciserverFileserviceManagerApplication.class);
+		return application.sources(QuotaManagerApplication.class);
 	}
 
 }

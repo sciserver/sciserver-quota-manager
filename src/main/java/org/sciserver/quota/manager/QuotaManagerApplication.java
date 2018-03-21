@@ -29,9 +29,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableSwagger2
-public class SciserverFileserviceManagerApplication {
+public class QuotaManagerApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(SciserverFileserviceManagerApplication.class, args);
+		SpringApplication.run(QuotaManagerApplication.class, args);
 	}
 
 	@Bean
