@@ -32,11 +32,11 @@ import org.springframework.stereotype.Component;
 public class ApplyQuotasEndpoint {
 	private final Logger logger = LoggerFactory.getLogger(ApplyQuotasEndpoint.class);
 	private final Config config;
-	private final FileServiceModule fileServiceModule;
+	private final FileSystemModule fileSystemModule;
 
-	public ApplyQuotasEndpoint(Config config, FileServiceModule fileServiceModule) {
+	public ApplyQuotasEndpoint(Config config, FileSystemModule fileSystemModule) {
 		this.config = config;
-		this.fileServiceModule = fileServiceModule;
+		this.fileSystemModule = fileSystemModule;
 	}
 
 	@WriteOperation
@@ -56,10 +56,10 @@ public class ApplyQuotasEndpoint {
 						Path relativePath = rootVolumeAsPath.relativize(folder);
 						String folderFullName = folder.toAbsolutePath().toString();
 						if (relativePath.getNameCount() == 1 && rvEntry.getValue().getPerUserQuota() > 0) {
-							fileServiceModule.setQuota(folderFullName, rvEntry.getValue().getPerUserQuota());
+							fileSystemModule.setQuota(folderFullName, rvEntry.getValue().getPerUserQuota());
 						}
 						if (relativePath.getNameCount() == 2 && rvEntry.getValue().getPerVolumeQuota() > 0 ) {
-							fileServiceModule.setQuota(folderFullName, rvEntry.getValue().getPerVolumeQuota());
+							fileSystemModule.setQuota(folderFullName, rvEntry.getValue().getPerVolumeQuota());
 						}
 					});
 			} catch (IOException e) {

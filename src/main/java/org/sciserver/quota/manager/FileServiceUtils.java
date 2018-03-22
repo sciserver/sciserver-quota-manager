@@ -42,13 +42,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class FileServiceUtils {
 	private static final String RELATIVE_PATH_PATTERN = "{keystoneId}/{userVolumeName}";
 
-	private final FileServiceModule fileServiceModule;
+	private final FileSystemModule fileSystemModule;
 	private final Config config;
 
 	@Autowired
-	public FileServiceUtils(Config config, FileServiceModule fileServiceModule) {
+	public FileServiceUtils(Config config, FileSystemModule fileSystemModule) {
 		this.config = config;
-		this.fileServiceModule = fileServiceModule;
+		this.fileSystemModule = fileSystemModule;
 	}
 
 	/**
@@ -77,12 +77,12 @@ public class FileServiceUtils {
 				PosixFilePermissions.fromString("rwxrwxrwx"));
 
 		if (rv.getPerUserQuota() != 0) {
-			fileServiceModule.setQuota(
+			fileSystemModule.setQuota(
 					userFolder.toString(),
 					rv.getPerUserQuota());
 		}
 		if (rv.getPerVolumeQuota() != 0) {
-			fileServiceModule.setQuota(
+			fileSystemModule.setQuota(
 					userVolumeFolder.toString(),
 					rv.getPerVolumeQuota());
 		}
@@ -104,7 +104,7 @@ public class FileServiceUtils {
 		Path userVolumeFolder = userFolder.resolve(pathVariables.get("userVolumeName"));
 
 		if (rv.getPerVolumeQuota() != 0) {
-			fileServiceModule.removeUserVolumeWithQuota(
+			fileSystemModule.removeUserVolumeWithQuota(
 					userVolumeFolder.toString());
 		} else {
 			FileUtils.deleteDirectory(userVolumeFolder.toFile());
@@ -113,6 +113,6 @@ public class FileServiceUtils {
 
 	@GetMapping("getUsage")
 	public Collection<Quota> getUsage() throws ExecuteException, IOException {
-		return fileServiceModule.getUsage();
+		return fileSystemModule.getUsage();
 	}
 }

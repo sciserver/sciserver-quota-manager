@@ -21,7 +21,7 @@ import java.util.Collection;
 import org.apache.commons.exec.ExecuteException;
 import org.sciserver.quota.manager.dto.Quota;
 
-public interface FileServiceModule {
+public interface FileSystemModule {
 	void setQuota(String filePath, long numberOfBytes);
 	void removeUserVolumeWithQuota(String filePath);
 	Collection<Quota> getUsage() throws ExecuteException, IOException;

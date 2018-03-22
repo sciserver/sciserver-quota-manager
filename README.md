@@ -48,7 +48,7 @@ Spring profiles are used to control the method of applying quotas. `xfs` is curr
 This service will listen on port 21222 by default, but this is configurable with the `SERVER_PORT` environmental variable or the java `server.port` option.
 
 To run in Spring Tool Suite, simply run as a Spring Boot App.
-In other variants of Eclipse, running `SciserverFileserviceManagerApplication` as a Java application will start a local web server and display the port in the Console.
+In other variants of Eclipse, running `QuotaManagerApplication` as a Java application will start a local web server and display the port in the Console.
 
 To run standalone, the war file is runnable with `java -jar`. For example, to set the port to 222 use the `ceph` profile, and load /my/configuration.yaml, run:
 

@@ -33,18 +33,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuotaManagerHealthIndicator implements HealthIndicator {
 	private final Config config;
-	private final FileServiceModule fileServiceModule;
+	private final FileSystemModule fileSystemModule;
 
-	public QuotaManagerHealthIndicator(Config config, FileServiceModule fileServiceModule) {
+	public QuotaManagerHealthIndicator(Config config, FileSystemModule fileSystemModule) {
 		this.config = config;
-		this.fileServiceModule = fileServiceModule;
+		this.fileSystemModule = fileSystemModule;
 	}
 
 	@Override
 	public Health health() {
 		Health.Builder healthBuilder = new Health.Builder().up();
 		try {
-			Collection<Quota> allQuotaInfo = fileServiceModule.getUsage();
+			Collection<Quota> allQuotaInfo = fileSystemModule.getUsage();
 			List<QuotaProblem> errors = new ArrayList<>();
 
 			config.getRootVolumes().entrySet().stream()

@@ -40,7 +40,7 @@ import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
 import org.sciserver.quota.manager.Config;
-import org.sciserver.quota.manager.FileServiceModule;
+import org.sciserver.quota.manager.FileSystemModule;
 import org.sciserver.quota.manager.dto.Quota;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +55,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 @Component
 @Profile("xfs")
-public class XFSFileServiceModule implements FileServiceModule {
-	private final Logger logger = LoggerFactory.getLogger(XFSFileServiceModule.class);
+public class XFSFileSystemModule implements FileSystemModule {
+	private final Logger logger = LoggerFactory.getLogger(XFSFileSystemModule.class);
 	/* Note that despite this limit, the java code in this class
 	 * assumes that we can index on the project id, i.e., that
 	 * the project id's are less then Integer.MAX_VALUE (2^31)
@@ -70,7 +70,7 @@ public class XFSFileServiceModule implements FileServiceModule {
 	private final XFSConfig xfsConfig;
 	private final DefaultExecutor quotaExecutor;
 
-	public XFSFileServiceModule(Config config, XFSConfig xfsConfig) {
+	public XFSFileSystemModule(Config config, XFSConfig xfsConfig) {
 		this.config = config;
 		this.xfsConfig = xfsConfig;
 		quotaExecutor = new DefaultExecutor();
