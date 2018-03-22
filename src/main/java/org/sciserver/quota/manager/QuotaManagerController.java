@@ -39,14 +39,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class FileServiceUtils {
+public class QuotaManagerController {
 	private static final String RELATIVE_PATH_PATTERN = "{keystoneId}/{userVolumeName}";
 
 	private final FileSystemModule fileSystemModule;
 	private final Config config;
 
 	@Autowired
-	public FileServiceUtils(Config config, FileSystemModule fileSystemModule) {
+	public QuotaManagerController(Config config, FileSystemModule fileSystemModule) {
 		this.config = config;
 		this.fileSystemModule = fileSystemModule;
 	}

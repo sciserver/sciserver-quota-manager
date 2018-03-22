@@ -1,4 +1,4 @@
-<h2>Welcome to SciServer's <a href='https://github.com/sciserver/resource-management'>File Service Manager</a> repo.</h2>
+<h2>Welcome to SciServer's <a href='https://github.com/sciserver/sciserver-quota-manager'>Quota Manager</a> repo.</h2>
 
 <h3>Table of Contents</h3>
 <ul>
