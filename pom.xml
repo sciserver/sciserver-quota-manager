@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.sciserver</groupId>
-	<artifactId>sciserver-fileservice-manager</artifactId>
+	<artifactId>sciserver-quota-manager</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>sciserver-fileservice-manager</name>
-	<description>Low-level manager for file service operations. Handles quota-management and volume creation. Unlike sciserver-fileservice-java, this must be run on the machine local to the file system hosting the data</description>
+	<name>sciserver-quota-manager</name>
+	<description>Low-level quota manager for file service operations. Handles quota-management and volume creation. Unlike sciserver-fileservice-java, this must be run on the machine local to the file system hosting the data</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

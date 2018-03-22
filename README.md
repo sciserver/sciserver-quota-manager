@@ -26,7 +26,7 @@ An example configuration can be found in `example-deployment/example-config.yaml
 
 <h4>Common tasks</h4>
 
-`./mvnw package` - resolves all dependencies, builds the project, and runs unit tests. War file is placed in `target`. 
+`./mvnw package` - resolves all dependencies, builds the project, and runs unit tests. War file is placed in `target`.
 
 `mvnw package` - same as above, for Window developers
 
@@ -52,7 +52,7 @@ In other variants of Eclipse, running `SciserverFileserviceManagerApplication` a
 
 To run standalone, the war file is runnable with `java -jar`. For example, to set the port to 222 use the `ceph` profile, and load /my/configuration.yaml, run:
 
-    java -Dserver.port=222 -Dspring.profiles.active=ceph -Dspring.config.additional-location=/my/configuration.yaml -jar target/sciserver-fileservice-manager-0.0.1-SNAPSHOT.war
+    java -Dserver.port=222 -Dspring.profiles.active=ceph -Dspring.config.additional-location=/my/configuration.yaml -jar target/sciserver-quota-manager-0.0.1-SNAPSHOT.war
 
 The war file can also be deployed in any Servlet 3.0 container, including Tomcat 7.0+.
 

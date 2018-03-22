@@ -1,9 +1,9 @@
 [Unit]
-Description=Quota Manager for Sciserver Fileservices
+Description=Quota Manager for Sciserver
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/java -jar /path/to/sciserver-fileservice-manager.war
+ExecStart=/usr/bin/java -jar /path/to/sciserver-quota-manager.war
 Environment=SPRING_CONFIG_ADDITIONAL_LOCATION=/path/to/config.yaml
 
 # For hardening access to the system
