@@ -1,6 +1,6 @@
 org:
   sciserver:
-    fileservice:
+    quota:
       manager:
         xfs:
          # These are the file systems to apply these quotas to

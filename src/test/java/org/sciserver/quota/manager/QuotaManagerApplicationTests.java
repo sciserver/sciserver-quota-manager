@@ -1,4 +1,4 @@
-package org.sciserver.fileservice.manager;
+package org.sciserver.quota.manager;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Configuration
-@ConfigurationProperties(prefix="org.sciserver.fileservice.manager.xfs")
+@ConfigurationProperties(prefix="org.sciserver.quota.manager.xfs")
 public class XFSConfig {
 	private String mountedFileSystems;
 

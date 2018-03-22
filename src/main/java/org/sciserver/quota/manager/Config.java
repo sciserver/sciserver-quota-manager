@@ -29,7 +29,7 @@ import org.springframework.validation.annotation.Validated;
 
 @Component
 @Configuration
-@ConfigurationProperties(prefix="org.sciserver.fileservice.manager")
+@ConfigurationProperties(prefix="org.sciserver.quota.manager")
 @Validated
 public class Config {
 	@Valid
