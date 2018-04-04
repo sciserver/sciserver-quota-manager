@@ -18,6 +18,10 @@ package org.sciserver.quota.manager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 
 import com.google.common.base.Predicates;
 
@@ -30,6 +34,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSwagger2
 public class QuotaManagerApplication {
+	private static final String[] SWAGGER_ENDPOINTS = new String[] {
+			"/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
+			"/configuration/**", "/swagger-ui.html", "/webjars/**"};
+
 	public static void main(String[] args) {
 		SpringApplication.run(QuotaManagerApplication.class, args);
 	}
@@ -42,5 +50,29 @@ public class QuotaManagerApplication {
 				.paths(Predicates.not(PathSelectors.ant("/error")))
 				.build()
 				.useDefaultResponseMessages(false);
+	}
+
+	@Bean WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
+		return new WebSecurityConfigurerAdapter() {
+			@Override
+			public void configure(HttpSecurity http) throws Exception {
+				http
+					.authorizeRequests()
+						.antMatchers("/actuator/info", "/actuator/health").permitAll()
+						.anyRequest().authenticated()
+						.and()
+					.httpBasic()
+						.and()
+					.exceptionHandling()
+						.authenticationEntryPoint(new BasicAuthenticationEntryPoint());
+			}
+
+			@Override
+			public void configure(WebSecurity web) {
+				web
+					.ignoring()
+					.antMatchers(SWAGGER_ENDPOINTS);
+			}
+		};
 	}
 }

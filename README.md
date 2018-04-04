@@ -12,7 +12,7 @@
 
 <h3 id="description">Description</h3>
 
-This repository contains a utility for managing the quotas on a given system. No authentication or authorization is performed; it is assumed this service is only accessible to the sciserver fileservice.
+This repository contains a utility for managing the quotas on a given system.
 
 <h3 id="installation">Installation</h3>
 
@@ -56,8 +56,15 @@ To run standalone, the war file is runnable with `java -jar`. For example, to se
 
 The war file can also be deployed in any Servlet 3.0 container, including Tomcat 7.0+.
 
+
+<h4 id="authentication">Authentication</h4>
+
+Authentication for almost all endpoints is via HTTP Basic authentication with a fixed username/password. By default, the username "user" and a random password printed in the logs is allowed. These can be set via the `spring.security.user.name` and `spring.security.user.password` respectively.
+
+The only endpoints excluded from authentication are swagger-related (at `/swagger-ui.html`), the info actuator (at `/actuator/info`), and the health actuator (at `/actuator/health`). The health endpoint will only give an UP/DOWN message and appropriate status code when unauthorized, otherwise it will give details on the various health checks applied.
+
 <h3 id="contributing">Contributing</h3>
-After the first production release, this repo use the branching strategies described in Git Flow.
+After the first production release, this repo uses the branching strategies described in Git Flow.
 
 <h3 id="license">License</h3>
 

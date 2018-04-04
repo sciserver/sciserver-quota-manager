@@ -1,13 +1,20 @@
+spring:
+  security:
+    user:
+      # defaults to 'user'
+      name: username_for_authentication
+      # defaults to a random password in the logs at INFO level
+      password: password_for_authentication
 org:
   sciserver:
     quota:
       manager:
         xfs:
-         # These are the file systems to apply these quotas to
-         # Not always needed (if the quotas are applied to the root filesystem,
-         # or there is only one XFS mount), but should be safe to always
-         # provide.
-         mounted-file-systems: /some/path1 /some/path2
+          # These are the file systems to apply these quotas to
+          # Not always needed (if the quotas are applied to the root filesystem,
+          # or there is only one XFS mount), but should be safe to always
+          # provide.
+          mounted-file-systems: /some/path1 /some/path2
         rootVolumes:
           "[Persistent Volumes]":
             path-on-file-server: /some/path/to/persistent
