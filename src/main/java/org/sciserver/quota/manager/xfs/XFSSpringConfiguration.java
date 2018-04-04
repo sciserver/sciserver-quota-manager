@@ -17,7 +17,6 @@ public class XFSSpringConfiguration {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(1);
 		executor.setMaxPoolSize(1);
-		executor.setQueueCapacity(20);
 		executor.setThreadNamePrefix("xfs-helper-");
 		executor.initialize();
 		return executor;
