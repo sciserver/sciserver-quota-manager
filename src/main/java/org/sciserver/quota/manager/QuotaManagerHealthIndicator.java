@@ -68,31 +68,13 @@ public class QuotaManagerHealthIndicator implements HealthIndicator {
 									.filter(q -> q.getRootVolumeName().equals(rootVolumeName))
 									.filter(q -> relativePath.toString().equals(q.getRelativePath()))
 									.findFirst();
-								if (relativePath.getNameCount() == 1 &&
-										(rvEntry.getValue().getPerUserQuota() > 0 || folderQuota.isPresent())) {
-									if (!folderQuota.isPresent()) {
-										errors.add(new QuotaProblem(folderFullName, "No user-id level quota found"));
-									} else {
-										if (folderQuota.get().getNumberOfBytesQuota() != rvEntry.getValue().getPerUserQuota()) {
-											errors.add(new QuotaProblem(folderFullName,
-												String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
-														rvEntry.getValue().getPerUserQuota(),
-														folderQuota.get().getNumberOfBytesQuota())));
-										}
-									}
+								if (relativePath.getNameCount() == 1) {
+									checkUserQuota(errors, rvEntry.getValue().getPerUserQuota(),
+											folderFullName, folderQuota);
 								}
-								if (relativePath.getNameCount() == 2 &&
-										(rvEntry.getValue().getPerVolumeQuota() > 0 || folderQuota.isPresent())) {
-									if (!folderQuota.isPresent()) {
-										errors.add(new QuotaProblem(folderFullName, "No volume level quota found"));
-									} else {
-										if (folderQuota.get().getNumberOfBytesQuota() != rvEntry.getValue().getPerVolumeQuota()) {
-											errors.add(new QuotaProblem(folderFullName,
-												String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
-														rvEntry.getValue().getPerVolumeQuota(),
-														folderQuota.get().getNumberOfBytesQuota())));
-										}
-									}
+								if (relativePath.getNameCount() == 2) {
+									checkUserVolumeQuota(errors, rvEntry.getValue().getPerVolumeQuota(),
+											folderFullName, folderQuota);
 								}
 							});
 					} catch (IOException e) {
@@ -107,6 +89,34 @@ public class QuotaManagerHealthIndicator implements HealthIndicator {
 			return healthBuilder.build();
 		} catch (Exception e) {
 			return healthBuilder.down(e).build();
+		}
+	}
+
+	private void checkUserQuota(List<QuotaProblem> errors, long perUserQuota,
+			String folderFullName, Optional<Quota> folderQuota) {
+		long existingQuota = folderQuota.map(Quota::getNumberOfBytesQuota).orElse(0L);
+
+		if (perUserQuota > 0 && !folderQuota.isPresent()) {
+			errors.add(new QuotaProblem(folderFullName, "No user-id level quota found"));
+		} else if (perUserQuota != existingQuota) {
+			errors.add(new QuotaProblem(folderFullName,
+				String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
+						perUserQuota,
+						existingQuota)));
+		}
+	}
+
+	private void checkUserVolumeQuota(List<QuotaProblem> errors, long perVolumeQuota,
+			String folderFullName, Optional<Quota> folderQuota) {
+		long existingQuota = folderQuota.map(Quota::getNumberOfBytesQuota).orElse(0L);
+
+		if (perVolumeQuota > 0 && !folderQuota.isPresent()) {
+			errors.add(new QuotaProblem(folderFullName, "No volume level quota found"));
+		} else if (perVolumeQuota != existingQuota) {
+			errors.add(new QuotaProblem(folderFullName,
+				String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
+						perVolumeQuota,
+						existingQuota)));
 		}
 	}
 

@@ -23,7 +23,6 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.FileUtils;
 import org.sciserver.quota.manager.Config.RootVolume;
 import org.sciserver.quota.manager.dto.Quota;
@@ -112,7 +111,7 @@ public class QuotaManagerController {
 	}
 
 	@GetMapping("getUsage")
-	public Collection<Quota> getUsage() throws ExecuteException, IOException {
+	public Collection<Quota> getUsage() throws IOException {
 		return fileSystemModule.getUsage();
 	}
 }

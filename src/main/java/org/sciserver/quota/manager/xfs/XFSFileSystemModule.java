@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteStreamHandler;
 import org.apache.commons.exec.LogOutputStream;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -57,6 +56,11 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 @Profile("xfs")
 public class XFSFileSystemModule implements FileSystemModule {
 	private final Logger logger = LoggerFactory.getLogger(XFSFileSystemModule.class);
+
+	// output from xfs_quota is prefixed by this string
+	private static final String XFS_QUOTA_LOG_PREFIX = "[xfs_quota]";
+	private static final String XFS_QUOTA_COMMAND = "xfs_quota";
+
 	/* Note that despite this limit, the java code in this class
 	 * assumes that we can index on the project id, i.e., that
 	 * the project id's are less then Integer.MAX_VALUE (2^31)
@@ -78,13 +82,13 @@ public class XFSFileSystemModule implements FileSystemModule {
 				new PumpStreamHandler(new LogOutputStream() {
 					@Override
 					protected void processLine(String line, int logLevel) {
-						logger.info("[xfs_quota] " + line);
+						logger.info("{} {}", XFS_QUOTA_LOG_PREFIX, line);
 					}
 				},
 				new LogOutputStream() {
 					@Override
 					protected void processLine(String line, int logLevel) {
-						logger.error("[xfs_quota] " + line);
+						logger.error("{} {}", XFS_QUOTA_LOG_PREFIX, line);
 					}
 				}));
 	}
@@ -120,13 +124,13 @@ public class XFSFileSystemModule implements FileSystemModule {
 						StandardOpenOption.APPEND);
 
 				quotaExecutor.execute(new CommandLine("sudo")
-						.addArgument("xfs_quota")
+						.addArgument(XFS_QUOTA_COMMAND)
 						.addArgument("-xc")
 						.addArgument(String.format("project -s %d", projectId), false));
 			}
 
 			quotaExecutor.execute(new CommandLine("sudo")
-					.addArgument("xfs_quota")
+					.addArgument(XFS_QUOTA_COMMAND)
 					.addArgument("-xc")
 					.addArgument(String.format("limit -p bhard=%d %d", numberOfBytes, projectId), false)
 					.addArguments(splitIfPossible(xfsConfig.getMountedFileSystems())));
@@ -144,11 +148,11 @@ public class XFSFileSystemModule implements FileSystemModule {
 	@Async("xfsEditProjectsExecutor")
 	public void removeUserVolumeWithQuota(String filePath) {
 		try {
-			logger.info("Removing " + filePath + " from XFS project files");
+			logger.info("Removing {} from XFS project files", filePath);
 
 			Map<String, Long> pathsToProjectIds = getXFSProjects();
 			quotaExecutor.execute(new CommandLine("sudo")
-					.addArgument("xfs_quota")
+					.addArgument(XFS_QUOTA_COMMAND)
 					.addArgument("-xc")
 					.addArgument(String.format(
 							"limit -p bhard=%d %d", 0, pathsToProjectIds.get(filePath)), false)
@@ -180,16 +184,16 @@ public class XFSFileSystemModule implements FileSystemModule {
 	}
 
 	@Override
-	public Collection<Quota> getUsage() throws ExecuteException, IOException {
+	public Collection<Quota> getUsage() throws IOException {
 		Map<String, Map<String, QuotaReportLine>> collectedQuotaOutput = new HashMap<>();
 
 		logAndRun("bytes", collectedQuotaOutput, new CommandLine("sudo")
-				.addArgument("xfs_quota")
+				.addArgument(XFS_QUOTA_COMMAND)
 				.addArgument("-xc")
 				.addArgument("report -Np", false)
 				.addArguments(splitIfPossible(xfsConfig.getMountedFileSystems())));
 		logAndRun("files", collectedQuotaOutput, new CommandLine("sudo")
-				.addArgument("xfs_quota")
+				.addArgument(XFS_QUOTA_COMMAND)
 				.addArgument("-xc")
 				.addArgument("report -Ni", false)
 				.addArguments(splitIfPossible(xfsConfig.getMountedFileSystems())));
@@ -215,10 +219,10 @@ public class XFSFileSystemModule implements FileSystemModule {
 			.collect(Collectors.toList());
 	}
 
-	private void logAndRun(String label, Map<String, Map<String, QuotaReportLine>> outputHolder, CommandLine cmdLine) throws ExecuteException, IOException {
+	private void logAndRun(String label, Map<String, Map<String, QuotaReportLine>> outputHolder, CommandLine cmdLine) throws IOException {
 		DefaultExecutor executor = new DefaultExecutor();
 		executor.setStreamHandler(saveLines(label, outputHolder));
-		logger.trace("Running command: " + cmdLine.toString());
+		logger.trace("Running command: {}", cmdLine);
 		executor.execute(cmdLine);
 	}
 
@@ -234,16 +238,16 @@ public class XFSFileSystemModule implements FileSystemModule {
 			@Override
 			protected void processLine(String line, int logLevel) {
 				if (StringUtils.isEmpty(line)) return;
-				logger.trace("[xfs_quota] " + line);
+				logger.trace("{} {}", XFS_QUOTA_LOG_PREFIX, line);
 				String[] quotaComponents = line.split("\\s+");
-				outputHolder.computeIfAbsent(quotaComponents[0], (s) -> new HashMap<>());
+				outputHolder.computeIfAbsent(quotaComponents[0], s -> new HashMap<>());
 				outputHolder.get(quotaComponents[0]).put(label, new QuotaReportLine(line));
 			}
 		},
 		new LogOutputStream() {
 			@Override
 			protected void processLine(String line, int logLevel) {
-				logger.error("[xfs_quota] " + line);
+				logger.error("{} {}", XFS_QUOTA_LOG_PREFIX, line);
 			}
 		});
 	}
