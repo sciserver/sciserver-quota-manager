@@ -104,6 +104,15 @@ public class QuotaManagerHealthIndicator implements HealthIndicator {
 						perUserQuota,
 						existingQuota)));
 		}
+
+		// defaulting to zero since we don't know how much space is used unless the
+		// folder has a quota set
+		long existingBytesUsed = folderQuota.map(Quota::getNumberOfBytesUsed).orElse(0L);
+		if (existingBytesUsed > 1.1*perUserQuota) {
+			errors.add(new QuotaProblem(folderFullName,
+					String.format("A quota of %d bytes is exceeded by over 10%%. %d bytes are in use.",
+							perUserQuota, existingBytesUsed)));
+		}
 	}
 
 	private void checkUserVolumeQuota(List<QuotaProblem> errors, long perVolumeQuota,
@@ -117,6 +126,15 @@ public class QuotaManagerHealthIndicator implements HealthIndicator {
 				String.format("Expect a quota of %d bytes, but the quota is set to %d bytes",
 						perVolumeQuota,
 						existingQuota)));
+		}
+
+		// defaulting to zero since we don't know how much space is used unless the
+		// folder has a quota set
+		long existingBytesUsed = folderQuota.map(Quota::getNumberOfBytesUsed).orElse(0L);
+		if (existingBytesUsed > 1.1 * perVolumeQuota) {
+			errors.add(new QuotaProblem(folderFullName,
+					String.format("A quota of %d bytes is exceeded by over 10%%. %d bytes are in use.",
+							perVolumeQuota, existingBytesUsed)));
 		}
 	}
 
