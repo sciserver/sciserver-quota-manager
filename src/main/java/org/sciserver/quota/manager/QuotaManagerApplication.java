@@ -20,7 +20,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 
@@ -59,21 +58,16 @@ public class QuotaManagerApplication {
 			@Override
 			public void configure(HttpSecurity http) throws Exception {
 				http
+					.csrf().disable()
 					.authorizeRequests()
 						.antMatchers("/actuator/info", "/actuator/health").permitAll()
+						.antMatchers(SWAGGER_ENDPOINTS).permitAll()
 						.anyRequest().authenticated()
 						.and()
 					.httpBasic()
 						.and()
 					.exceptionHandling()
 						.authenticationEntryPoint(new BasicAuthenticationEntryPoint());
-			}
-
-			@Override
-			public void configure(WebSecurity web) {
-				web
-					.ignoring()
-					.antMatchers(SWAGGER_ENDPOINTS);
 			}
 		};
 	}
