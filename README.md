@@ -54,12 +54,18 @@ To run standalone, the war file is runnable with `java -jar`. For example, to se
 
     java -Dserver.port=222 -Dspring.profiles.active=ceph -Dspring.config.additional-location=/my/configuration.yaml -jar target/sciserver-quota-manager-0.0.1-SNAPSHOT.war
 
-Alternatively, the war file itself is an executable scripts:
+Alternatively, the war file itself is an executable script:
 
 	SERVER_PORT=222 SPRING_PROFILES_ACTIVE=ceph SPRING_CONFIG_ADDITIONAL_LOCATION=/my/configuration.yaml ./target/sciserver-quota-manager-0.0.1-SNAPSHOT.war
 
 The war file can also be deployed in any Servlet 3.0 container, including Tomcat 7.0+.
 
+<h4 id="systemd-service">Running as a systemd service</h4>
+
+The [example-deployment/sciserver-quota-manager.service](example-deployment/sciserver-quota-manager.service) file shows
+an example of a locked-down service, assuming the war file is located at `/path/to/sciserver-quota-manager.war`, the
+configuration is in a file at `/path/to/config.yaml`, and the managed folders are in `/path/to/storage`. Locking down
+the service from system access is possible in systemd 232 and newer, but the options are ignored for older versions.
 
 <h4 id="authentication">Authentication</h4>
 
