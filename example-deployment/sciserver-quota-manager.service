@@ -3,7 +3,8 @@ Description=Quota Manager for Sciserver
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/java -jar /path/to/sciserver-quota-manager.war
+ExecStart=/path/to/sciserver-quota-manager.war
+SuccessExitStatus=143
 Environment=SPRING_CONFIG_ADDITIONAL_LOCATION=/path/to/config.yaml
 
 # For hardening access to the system

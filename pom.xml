@@ -102,6 +102,9 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<executable>true</executable>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
