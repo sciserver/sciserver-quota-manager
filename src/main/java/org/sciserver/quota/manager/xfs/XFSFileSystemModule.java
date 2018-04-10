@@ -65,7 +65,7 @@ public class XFSFileSystemModule implements FileSystemModule {
 	 * assumes that we can index on the project id, i.e., that
 	 * the project id's are less then Integer.MAX_VALUE (2^31)
 	 */
-	private static final long MAX_PROJECT_ID = 2^32 - 2;
+	private static final long MAX_PROJECT_ID = 4294967296L - 2;
 	private static final long MIN_PROJECT_ID = 1;
 	private static final Path PROJECTS_FILE = Paths.get("/etc/projects");
 	private static final Path PROJIDS_FILE = Paths.get("/etc/projid");
