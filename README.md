@@ -65,7 +65,9 @@ The war file can also be deployed in any Servlet 3.0 container, including Tomcat
 The [example-deployment/sciserver-quota-manager.service](example-deployment/sciserver-quota-manager.service) file shows
 an example of a locked-down service, assuming the war file is located at `/path/to/sciserver-quota-manager.war`, the
 configuration is in a file at `/path/to/config.yaml`, and the managed folders are in `/path/to/storage`. Locking down
-the service from system access is possible in systemd 232 and newer, but the options are ignored for older versions.
+the service from system access is possible in systemd 232 and newer.
+
+Instead of locking down the ability to write to the system, sciserver-quota-manager can be run as a regular user who has `sudo` access to the `xfs_quota` command and write access to the `/etc/project` and `/etc/projid` files.
 
 <h4 id="authentication">Authentication</h4>
 
