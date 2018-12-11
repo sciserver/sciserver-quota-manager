@@ -247,7 +247,7 @@ public class XFSFileSystemModule implements FileSystemModule {
 		new LogOutputStream() {
 			@Override
 			protected void processLine(String line, int logLevel) {
-				logger.error("{} {}", XFS_QUOTA_LOG_PREFIX, line);
+				logger.error("%s %s", XFS_QUOTA_LOG_PREFIX, line);
 			}
 		});
 	}
