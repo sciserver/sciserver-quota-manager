@@ -18,7 +18,6 @@ package org.sciserver.quota.manager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
@@ -33,42 +32,41 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
 @EnableSwagger2
-@EnableScheduling
 public class QuotaManagerApplication {
-	private static final String[] SWAGGER_ENDPOINTS = new String[] {
-			"/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
-			"/configuration/**", "/swagger-ui.html", "/webjars/**"};
+    private static final String[] SWAGGER_ENDPOINTS = new String[] {
+            "/v2/api-docs", "/configuration/ui", "/swagger-resources/**",
+            "/configuration/**", "/swagger-ui.html", "/webjars/**"};
 
-	public static void main(String[] args) {
-		SpringApplication.run(QuotaManagerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(QuotaManagerApplication.class, args);
+    }
 
-	@Bean
-	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2)
-				.select()
-				.apis(RequestHandlerSelectors.any())
-				.paths(Predicates.not(PathSelectors.ant("/error")))
-				.build()
-				.useDefaultResponseMessages(false);
-	}
+    @Bean
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .select()
+                .apis(RequestHandlerSelectors.any())
+                .paths(Predicates.not(PathSelectors.ant("/error")))
+                .build()
+                .useDefaultResponseMessages(false);
+    }
 
-	@Bean WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
-		return new WebSecurityConfigurerAdapter() {
-			@Override
-			public void configure(HttpSecurity http) throws Exception {
-				http
-					.csrf().disable()
-					.authorizeRequests()
-						.antMatchers("/actuator/info", "/actuator/health").permitAll()
-						.antMatchers(SWAGGER_ENDPOINTS).permitAll()
-						.anyRequest().authenticated()
-						.and()
-					.httpBasic()
-						.and()
-					.exceptionHandling()
-						.authenticationEntryPoint(new BasicAuthenticationEntryPoint());
-			}
-		};
-	}
+    @Bean WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
+        return new WebSecurityConfigurerAdapter() {
+            @Override
+            public void configure(HttpSecurity http) throws Exception {
+                http
+                    .csrf().disable()
+                    .authorizeRequests()
+                        .antMatchers("/actuator/info", "/actuator/health").permitAll()
+                        .antMatchers(SWAGGER_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
+                        .and()
+                    .httpBasic()
+                        .and()
+                    .exceptionHandling()
+                        .authenticationEntryPoint(new BasicAuthenticationEntryPoint());
+            }
+        };
+    }
 }
